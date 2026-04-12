@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>QR Generator — rmonroy93</title>
+  <!-- APP_VERSION: 1.1.0 -->
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
   <script src="./qrcode.min.js"></script>
   <style>
@@ -36,6 +37,13 @@
       font-family: 'DM Mono', monospace;
       font-size: 22px; font-weight: 500;
       color: var(--accent); letter-spacing: -0.5px;
+    }
+    .header-row { display: flex; align-items: baseline; justify-content: space-between; }
+    .version-tag {
+      font-size: 10px; font-family: 'DM Mono', monospace;
+      color: var(--muted); background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 4px;
+      padding: 2px 8px;
     }
     .header p { font-size: 13px; color: var(--muted); margin-top: 4px; font-family: 'DM Mono', monospace; }
     .card {
@@ -131,7 +139,10 @@
 
 <div class="wrap">
   <div class="header">
-    <h1>QR_GENERATOR</h1>
+    <div class="header-row">
+      <h1>QR_GENERATOR</h1>
+      <span class="version-tag">v1.1.0</span>
+    </div>
     <p>rmonroy93 / mis-qr-codes</p>
   </div>
 
@@ -146,8 +157,9 @@
     <label>GitHub Token (classic)</label>
     <div class="token-row">
       <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" />
-      <button class="btn btn-primary" style="margin-bottom:0;" onclick="saveToken()">Guardar</button>
+      <button class="btn btn-primary" style="margin-bottom:0;" id="btn-guardar" onclick="saveToken()">Guardar</button>
     </div>
+    <div class="status" id="token-status"></div>
     <button class="btn btn-primary" id="btn-continuar" onclick="goToMain()" style="display:none;">Continuar →</button>
   </div>
 
@@ -197,12 +209,46 @@
     }
   }
 
-  function saveToken() {
+  function setTokenStatus(type, msg) {
+    const el = document.getElementById('token-status');
+    el.className = 'status ' + type;
+    el.innerHTML = type === 'loading'
+      ? `<span class="spinner"></span>${msg}`
+      : msg;
+  }
+
+  async function saveToken() {
     const t = document.getElementById('gh-token').value.trim();
-    if (!t) { alert('Ingresa tu token primero.'); return; }
-    localStorage.setItem(TOKEN_KEY, t);
-    document.getElementById('token-badge').style.display = 'inline-block';
-    document.getElementById('btn-continuar').style.display = 'block';
+    if (!t) { setTokenStatus('error', 'Ingresa tu token primero.'); return; }
+
+    const btn = document.getElementById('btn-guardar');
+    btn.disabled = true;
+    setTokenStatus('loading', 'Validando token...');
+
+    try {
+      const res = await fetch('https://api.github.com/user', {
+        headers: {
+          'Authorization': `Bearer ${t}`,
+          'Accept': 'application/vnd.github+json',
+          'X-GitHub-Api-Version': '2022-11-28'
+        }
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || `HTTP ${res.status}`);
+      }
+
+      const user = await res.json();
+      localStorage.setItem(TOKEN_KEY, t);
+      document.getElementById('token-badge').style.display = 'inline-block';
+      document.getElementById('btn-continuar').style.display = 'block';
+      setTokenStatus('success', `✓ Token válido — conectado como @${user.login}`);
+    } catch(e) {
+      setTokenStatus('error', `Token inválido: ${e.message}`);
+    } finally {
+      btn.disabled = false;
+    }
   }
 
   function goToMain() {
