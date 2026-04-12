@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>QR Gallery — rmonroy93</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0e0e0f;
+      --surface: #17171a;
+      --surface2: #1f1f24;
+      --border: #2a2a30;
+      --accent: #c8f135;
+      --accent-dim: #a0c020;
+      --text: #f0f0ee;
+      --muted: #888890;
+      --danger: #ff5c5c;
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+    .wrap { width: 100%; max-width: 860px; margin: 0 auto; }
+    .header { margin-bottom: 2rem; display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+    .header-left h1 {
+      font-family: 'DM Mono', monospace;
+      font-size: 22px; font-weight: 500;
+      color: var(--accent); letter-spacing: -0.5px;
+    }
+    .header-left p { font-size: 13px; color: var(--muted); margin-top: 4px; font-family: 'DM Mono', monospace; }
+    .header-right { display: flex; gap: 8px; align-items: center; }
+    .version-tag {
+      font-size: 10px; font-family: 'DM Mono', monospace;
+      color: var(--muted); background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 4px;
+      padding: 2px 8px;
+    }
+    .btn-nav {
+      font-size: 12px; font-family: 'DM Mono', monospace;
+      color: var(--accent); text-decoration: none;
+      padding: 6px 14px; border-radius: 8px;
+      border: 1px solid #3a5a00; background: #1a2e00;
+      transition: background 0.15s; cursor: pointer;
+    }
+    .btn-nav:hover { background: #253f00; }
+    .toolbar {
+      display: flex; gap: 8px; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center;
+    }
+    .search-input {
+      flex: 1; min-width: 200px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text);
+      font-size: 13px; font-family: 'DM Mono', monospace;
+      padding: 8px 14px; outline: none; transition: border-color 0.2s;
+    }
+    .search-input:focus { border-color: var(--accent); }
+    .search-input::placeholder { color: #444; }
+    .count-badge {
+      font-size: 12px; font-family: 'DM Mono', monospace;
+      color: var(--muted); white-space: nowrap;
+    }
+    .count-badge span { color: var(--accent); }
+    .btn-refresh {
+      font-size: 12px; font-family: 'DM Mono', monospace;
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--muted); border-radius: 8px;
+      padding: 8px 14px; cursor: pointer; transition: all 0.15s;
+    }
+    .btn-refresh:hover { background: var(--surface2); color: var(--text); }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1rem;
+    }
+    .qr-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      animation: fadeIn 0.3s ease;
+      display: flex; flex-direction: column; gap: 0.75rem;
+    }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+    .qr-img-wrap {
+      background: #fff; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      padding: 10px; min-height: 140px;
+    }
+    .qr-img-wrap img {
+      width: 120px; height: 120px; object-fit: contain; display: block;
+    }
+    .qr-img-wrap .img-error {
+      font-size: 11px; font-family: 'DM Mono', monospace;
+      color: #999; text-align: center;
+    }
+    .qr-name {
+      font-size: 13px; font-family: 'DM Mono', monospace;
+      color: var(--text); word-break: break-all;
+    }
+    .qr-actions { display: flex; flex-direction: column; gap: 6px; }
+    .link-box {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; padding: 6px 10px;
+    }
+    .link-box span {
+      flex: 1; font-size: 10px; font-family: 'DM Mono', monospace;
+      color: var(--muted); word-break: break-all; line-height: 1.4;
+    }
+    .btn-copy {
+      flex-shrink: 0; font-size: 10px; font-family: 'DM Mono', monospace;
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--muted); border-radius: 4px;
+      padding: 3px 8px; cursor: pointer; transition: all 0.15s; white-space: nowrap;
+    }
+    .btn-copy:hover { background: var(--accent); color: #0e0e0f; border-color: var(--accent); }
+    .btn-copy.copied { background: #1a2e00; color: var(--accent); border-color: #3a5a00; }
+    .qr-date {
+      font-size: 10px; font-family: 'DM Mono', monospace;
+      color: #555;
+    }
+    .state-msg {
+      text-align: center; padding: 3rem 1rem;
+      font-size: 14px; font-family: 'DM Mono', monospace; color: var(--muted);
+    }
+    .spinner {
+      display: inline-block; width: 14px; height: 14px;
+      border: 2px solid #1a3a5a; border-top-color: #60a0e0;
+      border-radius: 50%; animation: spin 0.7s linear infinite;
+      margin-right: 8px; vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .empty-icon { font-size: 32px; margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="header">
+    <div class="header-left">
+      <h1>QR_GALLERY</h1>
+      <p>rmonroy93 / mis-qr-codes / qr-codes</p>
+    </div>
+    <div class="header-right">
+      <span class="version-tag">v1.1.0</span>
+      <a href="./index.html" class="btn-nav">+ nuevo QR</a>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <input class="search-input" id="search" placeholder="buscar por nombre..." oninput="filterCards()" />
+    <span class="count-badge" id="count-badge"></span>
+    <button class="btn-refresh" onclick="loadGallery()">↺ recargar</button>
+  </div>
+
+  <div id="gallery-container">
+    <div class="state-msg"><span class="spinner"></span>Cargando QRs...</div>
+  </div>
+</div>
+
+<script>
+  const OWNER  = 'rmonroy93';
+  const REPO   = 'mis-qr-codes';
+  const FOLDER = 'qr-codes';
+  const BRANCH = 'main';
+
+  let allCards = [];
+
+  async function loadGallery() {
+    const container = document.getElementById('gallery-container');
+    container.innerHTML = '<div class="state-msg"><span class="spinner"></span>Cargando QRs...</div>';
+    document.getElementById('count-badge').textContent = '';
+
+    try {
+      const res = await fetch(
+        `https://api.github.com/repos/${OWNER}/${REPO}/contents/${FOLDER}?ref=${BRANCH}&t=${Date.now()}`,
+        { headers: { 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' } }
+      );
+
+      if (!res.ok) throw new Error(`GitHub API: HTTP ${res.status}`);
+
+      const files = await res.json();
+      const images = files.filter(f => f.type === 'file' && /\.(png|jpg|jpeg|gif|webp)$/i.test(f.name));
+
+      if (images.length === 0) {
+        container.innerHTML = '<div class="state-msg"><div class="empty-icon">📭</div>No hay QRs generados aún.<br>Ve al generador y crea el primero.</div>';
+        return;
+      }
+
+      allCards = images.map(f => ({
+        name: f.name,
+        rawUrl: `https://raw.githubusercontent.com/${OWNER}/${REPO}/refs/heads/${BRANCH}/${FOLDER}/${f.name}`,
+        ghUrl: f.html_url,
+        sha: f.sha
+      }));
+
+      renderCards(allCards);
+      updateCount(allCards.length, allCards.length);
+
+    } catch(e) {
+      container.innerHTML = `<div class="state-msg" style="color:var(--danger);">Error al cargar: ${e.message}</div>`;
+    }
+  }
+
+  function renderCards(cards) {
+    const container = document.getElementById('gallery-container');
+    if (cards.length === 0) {
+      container.innerHTML = '<div class="state-msg">No hay resultados para esa búsqueda.</div>';
+      return;
+    }
+    container.innerHTML = '<div class="grid" id="grid"></div>';
+    const grid = document.getElementById('grid');
+    cards.forEach(c => grid.appendChild(makeCard(c)));
+  }
+
+  function makeCard(c) {
+    const div = document.createElement('div');
+    div.className = 'qr-card';
+    div.dataset.name = c.name.toLowerCase();
+    div.innerHTML = `
+      <div class="qr-img-wrap">
+        <img src="${c.rawUrl}" alt="${c.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"/>
+        <div class="img-error" style="display:none;">No se pudo cargar la imagen</div>
+      </div>
+      <div class="qr-name">${c.name}</div>
+      <div class="qr-actions">
+        <div class="link-box">
+          <span>${c.rawUrl}</span>
+          <button class="btn-copy" onclick="copyText('${c.rawUrl}', this)">copiar</button>
+        </div>
+        <div class="link-box">
+          <span>${c.ghUrl}</span>
+          <button class="btn-copy" onclick="copyText('${c.ghUrl}', this)">copiar</button>
+        </div>
+      </div>
+    `;
+    return div;
+  }
+
+  function updateCount(shown, total) {
+    const el = document.getElementById('count-badge');
+    el.innerHTML = shown === total
+      ? `<span>${total}</span> QR${total !== 1 ? 's' : ''}`
+      : `<span>${shown}</span> de ${total}`;
+  }
+
+  function filterCards() {
+    const q = document.getElementById('search').value.toLowerCase().trim();
+    const filtered = allCards.filter(c => c.name.toLowerCase().includes(q));
+    renderCards(filtered);
+    updateCount(filtered.length, allCards.length);
+  }
+
+  async function copyText(text, btn) {
+    try {
+      await navigator.clipboard.writeText(text);
+      btn.textContent = '✓ copiado';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'copiar'; btn.classList.remove('copied'); }, 2000);
+    } catch(_) {
+      prompt('Copia esta liga:', text);
+    }
+  }
+
+  loadGallery();
+</script>
+</body>
+</html>
