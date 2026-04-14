@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>QR Busqueda — rmonroy93</title>
+  <!-- APP_VERSION: 2.0.0 -->
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0e0e0f;
+      --surface: #17171a;
+      --surface2: #1f1f24;
+      --border: #2a2a30;
+      --accent: #c8f135;
+      --accent-dim: #a0c020;
+      --text: #f0f0ee;
+      --muted: #888890;
+      --danger: #ff5c5c;
+      --danger-bg: #2a0000;
+      --danger-border: #500;
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+    .wrap { width: 100%; max-width: 860px; margin: 0 auto; }
+
+    /* Header */
+    .header { margin-bottom: 2rem; display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+    .header-left h1 {
+      font-family: 'DM Mono', monospace;
+      font-size: 22px; font-weight: 500;
+      color: var(--accent); letter-spacing: -0.5px;
+    }
+    .header-left p { font-size: 13px; color: var(--muted); margin-top: 4px; font-family: 'DM Mono', monospace; }
+    .header-right { display: flex; gap: 8px; align-items: center; }
+    .version-tag {
+      font-size: 10px; font-family: 'DM Mono', monospace;
+      color: var(--muted); background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 4px;
+      padding: 2px 8px;
+    }
+    .btn-nav {
+      font-size: 12px; font-family: 'DM Mono', monospace;
+      color: var(--accent); text-decoration: none;
+      padding: 6px 14px; border-radius: 8px;
+      border: 1px solid #3a5a00; background: #1a2e00;
+      transition: background 0.15s; cursor: pointer;
+    }
+    .btn-nav:hover { background: #253f00; }
+
+    /* Search panel */
+    .search-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .search-panel label {
+      display: block;
+      font-size: 11px; font-family: 'DM Mono', monospace;
+      color: var(--muted); text-transform: uppercase;
+      letter-spacing: 1px; margin-bottom: 0.75rem;
+    }
+    textarea {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 13px;
+      font-family: 'DM Mono', monospace;
+      padding: 10px 14px;
+      resize: vertical;
+      min-height: 120px;
+      outline: none;
+      transition: border-color 0.2s;
+      line-height: 1.7;
+    }
+    textarea:focus { border-color: var(--accent); }
+    textarea::placeholder { color: #444; }
+    .search-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 0.75rem; gap: 1rem; flex-wrap: wrap;
+    }
+    .hint {
+      font-size: 11px; font-family: 'DM Mono', monospace;
+      color: #555; line-height: 1.5;
+    }
+    .btn-search {
+      padding: 10px 24px; border-radius: 8px;
+      font-size: 13px; font-family: 'DM Mono', monospace;
+      font-weight: 500; cursor: pointer;
+      background: var(--accent); color: #0e0e0f;
+      border: 1px solid var(--accent);
+      transition: all 0.15s; white-space: nowrap;
+    }
+    .btn-search:hover { background: var(--accent-dim); border-color: var(--accent-dim); }
+    .btn-search:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Summary bar */
+    .summary-bar {
+      display: none;
+      font-size: 12px; font-family: 'DM Mono', monospace;
+      color: var(--muted);
+      margin-bottom: 1.25rem;
+      padding: 10px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      display: flex; gap: 1.5rem; flex-wrap: wrap; align-items: center;
+    }
+    .summary-bar.visible { display: flex; }
+    .summary-bar .found { color: var(--accent); }
+    .summary-bar .missing { color: var(--danger); }
+    .btn-clear {
+      margin-left: auto;
+      font-size: 11px; font-family: 'DM Mono', monospace;
+      background: none; border: none;
+      color: #555; cursor: pointer; text-decoration: underline;
+      padding: 0;
+    }
+    .btn-clear:hover { color: var(--muted); }
+
+    /* Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+    .qr-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      animation: fadeIn 0.25s ease;
+      display: flex; flex-direction: column; gap: 0.75rem;
+    }
+    .qr-card.not-found {
+      background: var(--danger-bg);
+      border-color: var(--danger-border);
+      opacity: 0.75;
+    }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+    .qr-img-wrap {
+      background: #fff; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      padding: 10px; min-height: 130px;
+    }
+    .qr-img-wrap img {
+      width: 110px; height: 110px; object-fit: contain; display: block;
+    }
+    .not-found .qr-img-wrap {
+      background: var(--danger-bg);
+      border: 1px dashed var(--danger-border);
+      min-height: 130px;
+    }
+    .not-found-icon {
+      font-size: 28px;
+      display: flex; align-items: center; justify-content: center;
+      width: 100%; height: 110px;
+      color: var(--danger);
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+    }
+
+    .qr-name {
+      font-size: 12px; font-family: 'DM Mono', monospace;
+      color: var(--text); word-break: break-all;
+    }
+    .not-found .qr-name { color: var(--danger); }
+
+    .qr-actions { display: flex; flex-direction: column; gap: 6px; }
+    .link-box {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; padding: 6px 10px;
+    }
+    .link-box span {
+      flex: 1; font-size: 10px; font-family: 'DM Mono', monospace;
+      color: var(--muted); word-break: break-all; line-height: 1.4;
+    }
+    .btn-copy {
+      flex-shrink: 0; font-size: 10px; font-family: 'DM Mono', monospace;
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--muted); border-radius: 4px;
+      padding: 3px 8px; cursor: pointer; transition: all 0.15s; white-space: nowrap;
+    }
+    .btn-copy:hover { background: var(--accent); color: #0e0e0f; border-color: var(--accent); }
+    .btn-copy.copied { background: #1a2e00; color: var(--accent); border-color: #3a5a00; }
+
+    .state-msg {
+      text-align: center; padding: 3rem 1rem;
+      font-size: 14px; font-family: 'DM Mono', monospace; color: var(--muted);
+    }
+    .spinner {
+      display: inline-block; width: 14px; height: 14px;
+      border: 2px solid #1a3a5a; border-top-color: #60a0e0;
+      border-radius: 50%; animation: spin 0.7s linear infinite;
+      margin-right: 8px; vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="header">
+    <div class="header-left">
+      <h1>QR_BUSQUEDA</h1>
+      <p>rmonroy93 / mis-qr-codes / qr-codes</p>
+    </div>
+    <div class="header-right">
+      <span class="version-tag">v2.0.0</span>
+    </div>
+  </div>
+
+  <!-- Panel de búsqueda -->
+  <div class="search-panel">
+    <label>pega los folios a buscar — uno por línea</label>
+    <textarea id="folios-input" placeholder="770510338253&#10;227642564155&#10;317247673906&#10;905589951980&#10;..."></textarea>
+    <div class="search-footer">
+      <span class="hint">Cada línea se busca como nombre de archivo.<br>Se marcan en rojo los que no existan.</span>
+      <button class="btn-search" id="btn-buscar" onclick="buscar()">Buscar QRs →</button>
+    </div>
+  </div>
+
+  <!-- Barra de resumen -->
+  <div class="summary-bar" id="summary-bar">
+    <span id="summary-found"></span>
+    <span id="summary-missing"></span>
+    <button class="btn-clear" onclick="limpiar()">limpiar</button>
+  </div>
+
+  <!-- Resultados -->
+  <div id="results-container"></div>
+</div>
+
+<script>
+  const OWNER  = 'rmonroy93';
+  const REPO   = 'mis-qr-codes';
+  const FOLDER = 'qr-codes';
+  const BRANCH = 'main';
+
+  function rawUrl(folio) {
+    return `https://raw.githubusercontent.com/${OWNER}/${REPO}/refs/heads/${BRANCH}/${FOLDER}/${folio}.png`;
+  }
+
+  function ghUrl(folio) {
+    return `https://github.com/${OWNER}/${REPO}/blob/${BRANCH}/${FOLDER}/${folio}.png`;
+  }
+
+  function parseFolios(raw) {
+    return raw
+      .split(/[\n,;\s]+/)
+      .map(s => s.trim())
+      .filter(s => s.length > 0);
+  }
+
+  async function checkExists(url) {
+    try {
+      const res = await fetch(url, { method: 'HEAD' });
+      return res.ok;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  async function buscar() {
+    const raw = document.getElementById('folios-input').value;
+    const folios = parseFolios(raw);
+
+    if (folios.length === 0) {
+      alert('Pega al menos un folio.');
+      return;
+    }
+
+    const btn = document.getElementById('btn-buscar');
+    btn.disabled = true;
+    btn.textContent = 'Buscando...';
+
+    const container = document.getElementById('results-container');
+    container.innerHTML = `<div class="state-msg"><span class="spinner"></span>Verificando ${folios.length} folio${folios.length !== 1 ? 's' : ''}...</div>`;
+
+    document.getElementById('summary-bar').classList.remove('visible');
+
+    // Verificar existencia de cada folio en paralelo
+    const results = await Promise.all(
+      folios.map(async (folio) => ({
+        folio,
+        exists: await checkExists(rawUrl(folio))
+      }))
+    );
+
+    const found   = results.filter(r => r.exists);
+    const missing = results.filter(r => !r.exists);
+
+    // Resumen
+    const bar = document.getElementById('summary-bar');
+    document.getElementById('summary-found').innerHTML =
+      `<span class="found">${found.length}</span> encontrado${found.length !== 1 ? 's' : ''}`;
+    document.getElementById('summary-missing').innerHTML = missing.length > 0
+      ? `<span class="missing">${missing.length}</span> no encontrado${missing.length !== 1 ? 's' : ''}`
+      : '';
+    bar.classList.add('visible');
+
+    // Renderizar: primero los encontrados, luego los no encontrados
+    if (results.length === 0) {
+      container.innerHTML = '<div class="state-msg">Sin resultados.</div>';
+    } else {
+      container.innerHTML = '<div class="grid" id="grid"></div>';
+      const grid = document.getElementById('grid');
+      results.forEach(r => grid.appendChild(makeCard(r)));
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Buscar QRs →';
+  }
+
+  function makeCard({ folio, exists }) {
+    const div = document.createElement('div');
+    div.className = 'qr-card' + (exists ? '' : ' not-found');
+
+    if (exists) {
+      const url = rawUrl(folio);
+      const gh  = ghUrl(folio);
+      div.innerHTML = `
+        <div class="qr-img-wrap">
+          <img src="${url}" alt="${folio}"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+          <div class="not-found-icon" style="display:none;">sin imagen</div>
+        </div>
+        <div class="qr-name">${folio}.png</div>
+        <div class="qr-actions">
+          <div class="link-box">
+            <span>${url}</span>
+            <button class="btn-copy" onclick="copyText('${url}', this)">copiar</button>
+          </div>
+          <div class="link-box">
+            <span>${gh}</span>
+            <button class="btn-copy" onclick="copyText('${gh}', this)">copiar</button>
+          </div>
+        </div>
+      `;
+    } else {
+      div.innerHTML = `
+        <div class="qr-img-wrap">
+          <div class="not-found-icon">✗ no existe</div>
+        </div>
+        <div class="qr-name">${folio}.png</div>
+      `;
+    }
+
+    return div;
+  }
+
+  function limpiar() {
+    document.getElementById('results-container').innerHTML = '';
+    document.getElementById('summary-bar').classList.remove('visible');
+    document.getElementById('folios-input').value = '';
+    document.getElementById('folios-input').focus();
+  }
+
+  async function copyText(text, btn) {
+    try {
+      await navigator.clipboard.writeText(text);
+      btn.textContent = '✓ copiado';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'copiar'; btn.classList.remove('copied'); }, 2000);
+    } catch (_) {
+      prompt('Copia esta liga:', text);
+    }
+  }
+</script>
+</body>
+</html>
