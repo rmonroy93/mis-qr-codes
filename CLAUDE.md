@@ -9,6 +9,7 @@ App web estática (HTML + JS puro) que genera códigos QR y los sube automática
 | Recurso | URL |
 |---|---|
 | App generadora | https://rmonroy93.github.io/mis-qr-codes/ |
+| Menú de herramientas | https://rmonroy93.github.io/mis-qr-codes/menu.html |
 | Galería completa | https://rmonroy93.github.io/mis-qr-codes/gallery.html |
 | Galería búsqueda | https://rmonroy93.github.io/mis-qr-codes/gallery-v2.html |
 | Repositorio | https://github.com/rmonroy93/mis-qr-codes |
@@ -29,6 +30,7 @@ App web estática (HTML + JS puro) que genera códigos QR y los sube automática
 ├── gallery.html        # Galería dinámica — lista todos los QRs del repo
 ├── gallery-v2.html     # Galería búsqueda — filtra por lista de folios pegada
 ├── generador-codigos.html  # Generador de folios + sellos digitales (v1.1.0)
+├── menu.html           # Menú de navegación entre todas las páginas
 ├── qrcode.min.js       # Librería QR local (descargada de jsdelivr, NO CDN)
 ├── qr-codes/
 │   ├── .gitkeep        # Mantiene la carpeta en git
@@ -48,6 +50,7 @@ App web estática (HTML + JS puro) que genera códigos QR y los sube automática
 | v2.0.0 | gallery-v2.html | Galería búsqueda por folios: textarea con lista, verifica existencia en paralelo, cards encontrados/no encontrados |
 | v1.0.0 | generador-codigos.html | Generador de folios (12 dígitos) + sellos digitales (15×15 caracteres), salida tabulada para Excel |
 | v1.1.0 | generador-codigos.html | Validación de unicidad: nunca genera códigos repetidos en un mismo lote |
+| v1.0.0 | menu.html | Menú de navegación con cards a todas las herramientas del proyecto |
 
 ## Arquitectura de la app (index.html)
 

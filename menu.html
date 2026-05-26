@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Menú — rmonroy93</title>
+  <!-- APP_VERSION: 1.0.0 -->
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0e0e0f;
+      --surface: #17171a;
+      --surface2: #1f1f24;
+      --border: #2a2a30;
+      --accent: #c8f135;
+      --accent-dim: #a0c020;
+      --text: #f0f0ee;
+      --muted: #888890;
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      max-width: 640px;
+      width: 100%;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    header h1 {
+      font-family: 'DM Mono', monospace;
+      font-size: 1.6rem;
+      font-weight: 500;
+    }
+    header p {
+      color: var(--muted);
+      font-size: .9rem;
+      margin-top: 6px;
+    }
+    .badge {
+      display: inline-block;
+      background: var(--accent);
+      color: #000;
+      font-family: 'DM Mono', monospace;
+      font-size: .7rem;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-bottom: 12px;
+    }
+    .grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      text-decoration: none;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: border-color .2s, background .2s;
+    }
+    .card:hover {
+      border-color: var(--accent);
+      background: var(--surface2);
+    }
+    .card-icon {
+      font-family: 'DM Mono', monospace;
+      font-size: 1.4rem;
+      color: var(--accent);
+      min-width: 36px;
+      text-align: center;
+    }
+    .card-body h2 {
+      font-family: 'DM Mono', monospace;
+      font-size: 1rem;
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+    .card-body p {
+      font-size: .82rem;
+      color: var(--muted);
+    }
+    .card-version {
+      margin-left: auto;
+      font-family: 'DM Mono', monospace;
+      font-size: .7rem;
+      color: var(--muted);
+      background: var(--surface2);
+      padding: 3px 10px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+    .repo-link {
+      display: block;
+      text-align: center;
+      margin-top: 32px;
+      font-size: .82rem;
+      color: var(--muted);
+      text-decoration: none;
+    }
+    .repo-link:hover {
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">v1.0.0</div>
+      <h1>Menú de Herramientas</h1>
+      <p>rmonroy93 / mis-qr-codes</p>
+    </header>
+
+    <div class="grid">
+      <a class="card" href="index.html">
+        <div class="card-icon">▦</div>
+        <div class="card-body">
+          <h2>Generador QR</h2>
+          <p>Genera códigos QR y súbelos a GitHub</p>
+        </div>
+        <span class="card-version">v1.2.0</span>
+      </a>
+
+      <a class="card" href="gallery.html">
+        <div class="card-icon">◫</div>
+        <div class="card-body">
+          <h2>Galería de QRs</h2>
+          <p>Explora todos los QRs generados</p>
+        </div>
+        <span class="card-version">v1.0.0</span>
+      </a>
+
+      <a class="card" href="gallery-v2.html">
+        <div class="card-icon">◧</div>
+        <div class="card-body">
+          <h2>Búsqueda por Folios</h2>
+          <p>Verifica QRs por lista de folios</p>
+        </div>
+        <span class="card-version">v2.0.0</span>
+      </a>
+
+      <a class="card" href="generador-codigos.html">
+        <div class="card-icon">⚲</div>
+        <div class="card-body">
+          <h2>Generador de Códigos</h2>
+          <p>Crea folios y sellos digitales aleatorios</p>
+        </div>
+        <span class="card-version">v1.1.0</span>
+      </a>
+    </div>
+
+    <a class="repo-link" href="https://github.com/rmonroy93/mis-qr-codes" target="_blank">github.com/rmonroy93/mis-qr-codes</a>
+  </div>
+</body>
+</html>

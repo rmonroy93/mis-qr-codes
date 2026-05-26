@@ -10,3 +10,7 @@ Páginas creadas: [[Generador de Códigos]].
 
 ## 2026-05-26 fix | Unicidad en generador-codigos.html
 Se agregó validación de unicidad (Set) para garantizar que ningún código se repita dentro del mismo lote. v1.0.0 → v1.1.0.
+
+## 2026-05-26 feat | menu.html
+Nueva página `menu.html` (v1.0.0) con cards de navegación a todas las herramientas del proyecto.
+Páginas creadas: [[Menú de Herramientas]].
