@@ -8,7 +8,7 @@ tags: folio, sello-digital, generador, códigos
 
 ## Resumen
 
-Página `generador-codigos.html` (v1.0.0) que genera códigos compuestos por:
+Página `generador-codigos.html` (v1.1.0) que genera códigos compuestos por:
 - **Folio**: 12 dígitos aleatorios
 - **Sello digital**: 15 segmentos de 15 caracteres alfanuméricos (A-Z, a-z, 0-9) separados por guiones
 
@@ -22,6 +22,7 @@ Página `generador-codigos.html` (v1.0.0) que genera códigos compuestos por:
 ## Detalles técnicos
 
 - Usa `crypto.getRandomValues()` para números aleatorios criptográficamente seguros (no `Math.random()`)
+- Validación de unicidad vía Set: nunca genera códigos duplicados en un mismo lote
 - Sin dependencias externas
 - Diseño oscuro consistente con el resto del proyecto
 - Atajo: Enter en el input dispara la generación

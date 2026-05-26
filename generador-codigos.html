@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Generador de Códigos — rmonroy93</title>
-  <!-- APP_VERSION: 1.0.0 -->
+  <!-- APP_VERSION: 1.1.0 -->
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
   <style>
     :root {
@@ -168,7 +168,7 @@
 <body>
   <div class="container">
     <h1>Generador de Códigos</h1>
-    <div class="badge">v1.0.0</div>
+    <div class="badge">v1.1.0</div>
 
     <div class="field">
       <label for="cantidad">¿Cuántos códigos quieres generar?</label>
@@ -226,14 +226,24 @@
       const n = Math.min(Math.max(parseInt(input.value) || 1, 1), 5000);
       input.value = n;
 
+      const usados = new Set();
       const lines = [];
-      for (let i = 0; i < n; i++) {
-        lines.push(randomFolio() + '\t' + randomSello());
+      let intentos = 0;
+      const maxIntentos = n * 100;
+
+      while (lines.length < n && intentos < maxIntentos) {
+        intentos++;
+        const folio = randomFolio();
+        const sello = randomSello();
+        const clave = folio + '\t' + sello;
+        if (usados.has(clave)) continue;
+        usados.add(clave);
+        lines.push(clave);
       }
 
       const ta = document.getElementById('output');
       ta.value = lines.join('\n');
-      document.getElementById('line-count').textContent = '(' + n + ' líneas)';
+      document.getElementById('line-count').textContent = '(' + lines.length + ' líneas)';
       document.getElementById('copy-msg').classList.remove('show');
     }
 

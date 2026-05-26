@@ -28,7 +28,7 @@ App web estática (HTML + JS puro) que genera códigos QR y los sube automática
 ├── index.html          # App principal (generador de QRs)
 ├── gallery.html        # Galería dinámica — lista todos los QRs del repo
 ├── gallery-v2.html     # Galería búsqueda — filtra por lista de folios pegada
-├── generador-codigos.html  # Generador de folios + sellos digitales (v1.0.0)
+├── generador-codigos.html  # Generador de folios + sellos digitales (v1.1.0)
 ├── qrcode.min.js       # Librería QR local (descargada de jsdelivr, NO CDN)
 ├── qr-codes/
 │   ├── .gitkeep        # Mantiene la carpeta en git
@@ -47,6 +47,7 @@ App web estática (HTML + JS puro) que genera códigos QR y los sube automática
 | v1.2.0 | index.html | Tab "Carga masiva": pega N ligas, extrae folio del final de la URL, sube todos con progreso en tiempo real |
 | v2.0.0 | gallery-v2.html | Galería búsqueda por folios: textarea con lista, verifica existencia en paralelo, cards encontrados/no encontrados |
 | v1.0.0 | generador-codigos.html | Generador de folios (12 dígitos) + sellos digitales (15×15 caracteres), salida tabulada para Excel |
+| v1.1.0 | generador-codigos.html | Validación de unicidad: nunca genera códigos repetidos en un mismo lote |
 
 ## Arquitectura de la app (index.html)
 
