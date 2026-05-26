@@ -9,7 +9,8 @@ App web estática (HTML + JS puro) que genera códigos QR y los sube automática
 | Recurso | URL |
 |---|---|
 | App generadora | https://rmonroy93.github.io/mis-qr-codes/ |
-| Galería de QRs | https://rmonroy93.github.io/mis-qr-codes/gallery.html |
+| Galería completa | https://rmonroy93.github.io/mis-qr-codes/gallery.html |
+| Galería búsqueda | https://rmonroy93.github.io/mis-qr-codes/gallery-v2.html |
 | Repositorio | https://github.com/rmonroy93/mis-qr-codes |
 
 ## Configuración del repo
@@ -25,7 +26,9 @@ App web estática (HTML + JS puro) que genera códigos QR y los sube automática
 ```
 /
 ├── index.html          # App principal (generador de QRs)
-├── gallery.html        # Galería dinámica de QRs generados
+├── gallery.html        # Galería dinámica — lista todos los QRs del repo
+├── gallery-v2.html     # Galería búsqueda — filtra por lista de folios pegada
+├── generador-codigos.html  # Generador de folios + sellos digitales (v1.0.0)
 ├── qrcode.min.js       # Librería QR local (descargada de jsdelivr, NO CDN)
 ├── qr-codes/
 │   ├── .gitkeep        # Mantiene la carpeta en git
@@ -37,11 +40,13 @@ App web estática (HTML + JS puro) que genera códigos QR y los sube automática
 
 ## Versiones
 
-| Versión | Cambios |
-|---|---|
-| v1.0.0 | App base: token, generador individual, panel de éxito |
-| v1.1.0 | Validación de token contra GitHub API `/user`, badge de versión en header |
-| v1.2.0 | Tab "Carga masiva": pega N ligas, extrae folio del final de la URL, sube todos con progreso en tiempo real |
+| Versión | Archivo | Cambios |
+|---|---|---|
+| v1.0.0 | index.html | App base: token, generador individual, panel de éxito |
+| v1.1.0 | index.html | Validación de token contra GitHub API `/user`, badge de versión en header |
+| v1.2.0 | index.html | Tab "Carga masiva": pega N ligas, extrae folio del final de la URL, sube todos con progreso en tiempo real |
+| v2.0.0 | gallery-v2.html | Galería búsqueda por folios: textarea con lista, verifica existencia en paralelo, cards encontrados/no encontrados |
+| v1.0.0 | generador-codigos.html | Generador de folios (12 dígitos) + sellos digitales (15×15 caracteres), salida tabulada para Excel |
 
 ## Arquitectura de la app (index.html)
 
@@ -78,6 +83,24 @@ App web estática (HTML + JS puro) que genera códigos QR y los sube automática
 - Buscador por nombre en tiempo real
 - Sin autenticación requerida
 
+## gallery-v2.html
+
+- Sin carga inicial — solo busca cuando el usuario pega folios
+- Textarea acepta folios separados por salto de línea, coma o espacio
+- Verifica existencia via HEAD request a `raw.githubusercontent.com` (sin GitHub API, sin rate limit)
+- Verificaciones en paralelo (Promise.all) — más rápido que secuencial
+- Cards verdes = encontrado (imagen + raw URL + GitHub URL + botones copiar)
+- Cards rojos = no encontrado
+- Barra de resumen: X encontrados / Y no encontrados
+- Sin botones de navegación (diseño limpio y enfocado)
+
+## Servidor local (Windows, sin Python)
+
+```bash
+node -e "const h=require('http'),fs=require('fs'),path=require('path');h.createServer((req,res)=>{let f=path.join('C:/Users/ricar/OneDrive/Documentos/Claude/Creador de qr',req.url==='/'?'index.html':req.url);try{const d=fs.readFileSync(f);const ext=path.extname(f);const t={'html':'text/html','js':'application/javascript','png':'image/png'}[ext.slice(1)]||'text/plain';res.writeHead(200,{'Content-Type':t});res.end(d);}catch(e){res.writeHead(404);res.end('404');}}).listen(8080,()=>console.log('OK'));"
+```
+Acceso: http://localhost:8080/
+
 ## Caso de uso principal actual
 
 El usuario trabaja con ligas de la forma:
@@ -92,9 +115,11 @@ Pega una lista de ligas, la app extrae el número de folio y lo usa como nombre 
 cd "C:\Users\ricar\OneDrive\Documentos\Claude\Creador de qr"
 git add <archivos>
 git commit -m "descripción"
-git pull https://rmonroy93:{TOKEN}@github.com/rmonroy93/mis-qr-codes.git main --no-edit
-git push https://rmonroy93:{TOKEN}@github.com/rmonroy93/mis-qr-codes.git main
+git pull https://rmonroy93:TOKEN@github.com/rmonroy93/mis-qr-codes.git main --no-edit
+git push https://rmonroy93:TOKEN@github.com/rmonroy93/mis-qr-codes.git main
 ```
+
+> **Nota:** El token está en `.claude/settings.local.json` como `GITHUB_TOKEN`, pero la interpolación `${GITHUB_TOKEN}` no funciona en URLs de git en este entorno. Usar el valor directamente en el comando.
 
 GitHub Pages tarda ~1 minuto en reflejar los cambios.
 
